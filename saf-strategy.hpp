@@ -15,8 +15,8 @@
  * ndnSIM, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef SAF_H
-#define SAF_H
+#ifndef SAFStrategy_H
+#define SAFStrategy_H
 
 #include "face/face.hpp"
 #include "fw/strategy.hpp"
@@ -31,12 +31,12 @@ namespace fw
 /**
  * @brief The SAF class implements the SAF forwarding strategy.
  */
-class SAF : public nfd::fw::Strategy
+class SAFStrategy : public nfd::fw::Strategy
 {
 public:
-  SAF(Forwarder &forwarder, const Name &name = STRATEGY_NAME);
+  SAFStrategy(Forwarder &forwarder, const Name &name = STRATEGY_NAME);
 
-  virtual ~SAF();
+  virtual ~SAFStrategy();
   virtual void afterReceiveInterest(const nfd::Face& inFace, const ndn::Interest& interest,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry);
   virtual void beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const nfd::Face& inFace, const ndn::Data& data);
   virtual void beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry);
@@ -64,5 +64,5 @@ protected:
 
 }
 }
-#endif // SAF_H
+#endif // SAFStrategy_H
 

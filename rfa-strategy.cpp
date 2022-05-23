@@ -1,20 +1,20 @@
-#include "RFA.h"
+#include "rfa-strategy.hpp"
 
 using namespace nfd;
 using namespace nfd::fw;
 
-const Name RFA::STRATEGY_NAME("ndn:/localhost/nfd/strategy/RFA");
+const Name RFAStrategy::STRATEGY_NAME("ndn:/localhost/nfd/strategy/rfa");
 
-RFA::RFA(Forwarder &forwarder, const Name &name) : Strategy(forwarder, name)
+RFAStrategy::RFAStrategy(Forwarder &forwarder, const Name &name) : Strategy(forwarder, name)
 {
   prefixComponents = ParameterConfiguration::getInstance ()->getParameter ("PREFIX_COMPONENT");
 }
 
-RFA::~RFA()
+RFAStrategy::~RFAStrategy()
 {
 }
 
-void RFA::afterReceiveInterest(const Face& inFace, const Interest& interest ,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry)
+void RFAStrategy::afterReceiveInterest(const Face& inFace, const Interest& interest ,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry)
 {
   /* Attention!!! interest != pitEntry->interest*/ // necessary to emulate NACKs in ndnSIM2.0
   /* interst could be /NACK/suffix, while pitEntry->getInterest is /suffix */
@@ -101,7 +101,7 @@ void RFA::afterReceiveInterest(const Face& inFace, const Interest& interest ,sha
   sendInterest(pitEntry, getFaceTable ().get (out_face_id));
 }
 
-void RFA::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFace, const Data& data)
+void RFAStrategy::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFace, const Data& data)
 {
   if(inFace.getId () <= 255) // this are virtual faces like the content store/ skip it
   {
@@ -120,7 +120,7 @@ void RFA::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFa
   Strategy::beforeSatisfyInterest (pitEntry,inFace, data);
 }
 
-void RFA::beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry)
+void RFAStrategy::beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry)
 {
 
   std::vector<int> faces = getAllOutFaces (pitEntry);
@@ -138,7 +138,7 @@ void RFA::beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry)
   Strategy::beforeExpirePendingInterest (pitEntry);
 }
 
-boost::shared_ptr<PIC> RFA::findPICEntry(int face_id, std::string prefix)
+boost::shared_ptr<PIC> RFAStrategy::findPICEntry(int face_id, std::string prefix)
 {
   PrefixMap::iterator it = pmap.find (prefix);
 
@@ -160,7 +160,7 @@ boost::shared_ptr<PIC> RFA::findPICEntry(int face_id, std::string prefix)
 }
 
 
-std::string RFA::extractContentPrefix(nfd::Name name)
+std::string RFAStrategy::extractContentPrefix(nfd::Name name)
 {
   std::string prefix = "";
   for(int i=0; i <= prefixComponents; i++)
@@ -171,7 +171,7 @@ std::string RFA::extractContentPrefix(nfd::Name name)
   return prefix;
 }
 
-std::vector<int> RFA::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
+std::vector<int> RFAStrategy::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
 {
   std::vector<int> faces;
   const nfd::pit::OutRecordCollection records = pitEntry->getOutRecords();
@@ -182,7 +182,7 @@ std::vector<int> RFA::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
   return faces;
 }
 
-std::vector<int> RFA::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
+std::vector<int> RFAStrategy::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
 {
   std::vector<int> faces;
   const nfd::pit::InRecordCollection records = pitEntry->getInRecords();
@@ -195,7 +195,7 @@ std::vector<int> RFA::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
   return faces;
 }
 
-bool RFA::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
+bool RFAStrategy::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
   if(it == inFaceMap.end ())
@@ -210,7 +210,7 @@ bool RFA::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
   return false;
 }
 
-void RFA::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interest)
+void RFAStrategy::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
 
@@ -223,7 +223,7 @@ void RFA::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interes
     inFaceMap[interest.getName ().toUri ()].push_back(inFace.getId());    //remember it
 }
 
-void RFA::clearKnownFaces(const ndn::Interest&interest)
+void RFAStrategy::clearKnownFaces(const ndn::Interest&interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
 

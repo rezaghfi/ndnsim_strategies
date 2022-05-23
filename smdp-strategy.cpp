@@ -1,9 +1,4 @@
-/*
- * smdp-strategy.cpp
- *
- *  Created on: Jun 26, 2019
- *      Author: reza
- */
+
 // bandwitdh byte/second
 #define BW	1000000
 #define RoutingMetric 1
@@ -16,11 +11,11 @@
 namespace nfd {
 namespace fw {
 
-NFD_LOG_INIT(smdpStrategy);
-NFD_REGISTER_STRATEGY(smdpStrategy);
+NFD_LOG_INIT(SMDPStrategy);
+NFD_REGISTER_STRATEGY(SMDPStrategy);
 
-const time::milliseconds smdpStrategy::RETX_SUPPRESSION_INITIAL(10);
-const time::milliseconds smdpStrategy::RETX_SUPPRESSION_MAX(250);
+const time::milliseconds SMDPStrategy::RETX_SUPPRESSION_INITIAL(10);
+const time::milliseconds SMDPStrategy::RETX_SUPPRESSION_MAX(250);
 
 ns3::QueueSize countFaceInterests;
 /**
@@ -28,7 +23,7 @@ ns3::QueueSize countFaceInterests;
  * @param forwarder instance for run strategy
  * @param name of strategy
  */
-smdpStrategy::smdpStrategy(Forwarder& forwarder, const Name& name)
+SMDPStrategy::SMDPStrategy(Forwarder& forwarder, const Name& name)
 :Strategy(forwarder)
 , m_retxSuppression(RETX_SUPPRESSION_INITIAL,
         RetxSuppressionExponential::DEFAULT_MULTIPLIER,
@@ -50,8 +45,8 @@ smdpStrategy::smdpStrategy(Forwarder& forwarder, const Name& name)
  * @return strategyName
  */
 const Name&
-smdpStrategy::getStrategyName(){
-	static Name strategyName("/localhost/nfd/strategy/smdpstrategy/%FD%01");
+SMDPStrategy::getStrategyName(){
+	static Name strategyName("/localhost/nfd/strategy/smdp/%FD%01");
 	return strategyName;
 }
 
@@ -62,7 +57,7 @@ smdpStrategy::getStrategyName(){
  * @param pitEntry
  */
 void
-smdpStrategy::afterReceiveInterest(const Face& inFace, const Interest& interest,
+SMDPStrategy::afterReceiveInterest(const Face& inFace, const Interest& interest,
                        const shared_ptr<pit::Entry>& pitEntry){
   /* todo interest can three kinds:
    * NEW, FORWARD, SUppress
@@ -132,7 +127,7 @@ int smdpresult(FaceStats* stats, int rows) {
  * @return the best face for sending Interest
  */
 Face*
-smdpStrategy::getBestFaceForForwarding(const fib::Entry& fibEntry, const Interest& interest, const Face& inFace){
+SMDPStrategy::getBestFaceForForwarding(const fib::Entry& fibEntry, const Interest& interest, const Face& inFace){
 
 	const fib::NextHopList& nexthops = fibEntry.getNextHops();
 	FaceStats* stats = new FaceStats[10];
@@ -173,7 +168,7 @@ smdpStrategy::getBestFaceForForwarding(const fib::Entry& fibEntry, const Interes
  * @param pitEntity
  */
 void
-smdpStrategy::sendNoRouteNack(const Face& inFace, const Interest& interest,
+SMDPStrategy::sendNoRouteNack(const Face& inFace, const Interest& interest,
                              const shared_ptr<pit::Entry>& pitEntry)
 {
   NFD_LOG_DEBUG(interest << " from=" << inFace.getId() << " noNextHop");

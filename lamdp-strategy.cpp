@@ -1,7 +1,7 @@
 //////////////*
- * LAMDP-strategy.cpp
+ * 
  *
- *  Created on: Jun 26, 2019
+ *  Created on: Jun 30, 2019
  *      Author: reza
  */
 
@@ -52,7 +52,7 @@ LAMDPStrategy::LAMDPStrategy(Forwarder& forwarder, const Name& name)
  */
 const Name&
 LAMDPStrategy::getStrategyName(){
-	static Name strategyName("/localhost/nfd/strategy/lamdpstrategy/%FD%01");
+	static Name strategyName("/localhost/nfd/strategy/lamdp/%FD%01");
 	return strategyName;
 }
 

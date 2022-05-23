@@ -2,7 +2,7 @@
  * @author: reza gholamalitabar
  * @date: 12 tir 1400 10:02
 */
-#include "multipass-strategy.hpp"
+#include "amif-strategy.hpp"
 #include "algorithm.hpp"
 #include "common/global.hpp"
 #include "common/logger.hpp"
@@ -27,19 +27,19 @@ namespace nfd {
     int min_bw;
     nbw = 0, ndelay = 0, nthroughput;
 
-    NFD_LOG_INIT(MultiPassStrategy);
-    NFD_REGISTER_STRATEGY(MultiPassStrategy);
+    NFD_LOG_INIT(AMIFStrategy);
+    NFD_REGISTER_STRATEGY(AMIFStrategy);
 
-    // const time::milliseconds MultiPassStrategy::ROUTE_RENEW_LIFETIME(10_min);
+    // const time::milliseconds AMIFStrategy::ROUTE_RENEW_LIFETIME(10_min);
 
-    MultiPassStrategy::MultiPassStrategy(Forwarder& forwarder, const Name& name) : Strategy(forwarder) {
+    AMIFStrategy::AMIFStrategy(Forwarder& forwarder, const Name& name) : Strategy(forwarder) {
       ParsedInstanceName parsed = parseInstanceName(name);
       if (!parsed.parameters.empty()) {
-        NDN_THROW(std::invalid_argument("MultiPassStrategy does not accept parameters"));
+        NDN_THROW(std::invalid_argument("AMIFStrategy does not accept parameters"));
       }
       if (parsed.version && *parsed.version != getStrategyName()[-1].toVersion()) {
         NDN_THROW(std::invalid_argument(
-          "MultiPassStrategy does not support version " + to_string(*parsed.version)));
+          "AMIFStrategy does not support version " + to_string(*parsed.version)));
       }
       this->setInstanceName(makeInstanceName(name, getStrategyName()));
       this->multipass_num_max = 4;
@@ -48,8 +48,8 @@ namespace nfd {
       this->pathToSendDataRound = 0;
     }
 
-    const Name& MultiPassStrategy::getStrategyName() {
-      static Name strategyName("/localhost/nfd/strategy/multipass-strategy/%FD%01");
+    const Name& AMIFStrategy::getStrategyName() {
+      static Name strategyName("/localhost/nfd/strategy/amif/%FD%01");
       return strategyName;
     }
     double getdisjointness(int i, PathStats db_m[10]) {
@@ -62,7 +62,7 @@ namespace nfd {
     return getdisjointness;
   }
   //------------------------------------------- AFTER -- RECEIVE -- INTEREST -------------------------------------
-  void MultiPassStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Interest& interest, const shared_ptr<pit::Entry>& pitEntry) {
+  void AMIFStrategy::afterReceiveInterest(const FaceEndpoint& ingress, const Interest& interest, const shared_ptr<pit::Entry>& pitEntry) {
     const fib::Entry& fibEntry = this->lookupFib(*pitEntry);
     const fib::NextHopList& nexthops = fibEntry.getNextHops();
     bool pathDiscoveryPhase = interest.getTag<lp::PathDiscoveryPhaseTag>() != nullptr;
@@ -195,7 +195,7 @@ namespace nfd {
     }
   }
   //------------------------------------------- AFTER -- RECEIVE -- DATA -------------------------------------
-  void MultiPassStrategy::afterReceiveData(const shared_ptr<pit::Entry>& pitEntry, const FaceEndpoint& ingress, const Data& data) {
+  void AMIFStrategy::afterReceiveData(const shared_ptr<pit::Entry>& pitEntry, const FaceEndpoint& ingress, const Data& data) {
 
     auto outRecord = pitEntry->getOutRecord(ingress.face);
     if (outRecord == pitEntry->out_end()) {
@@ -306,7 +306,7 @@ namespace nfd {
 }
 }
 
-void MultiPassStrategy::afterReceiveNack(const FaceEndpoint& ingress, const lp::Nack& nack, const shared_ptr<pit::Entry>& pitEntry) {
+void AMIFStrategy::afterReceiveNack(const FaceEndpoint& ingress, const lp::Nack& nack, const shared_ptr<pit::Entry>& pitEntry) {
   NFD_LOG_DEBUG("Nack for " << nack.getInterest() << " from=" << ingress
     << " reason=" << nack.getReason());
   if (nack.getReason() == lp::NackReason::NO_ROUTE) { // remove FIB entries
@@ -317,7 +317,7 @@ void MultiPassStrategy::afterReceiveNack(const FaceEndpoint& ingress, const lp::
   }
 }
 
-void MultiPassStrategy::broadcastInterest(const Interest& interest, const Face& inFace, const shared_ptr<pit::Entry>& pitEntry) {
+void AMIFStrategy::broadcastInterest(const Interest& interest, const Face& inFace, const shared_ptr<pit::Entry>& pitEntry) {
   for (auto& outFace : this->getFaceTable() | boost::adaptors::reversed) {
     if ((outFace.getId() == inFace.getId() && outFace.getLinkType() != ndn::nfd::LINK_TYPE_AD_HOC) ||
       wouldViolateScope(inFace, interest, outFace) || outFace.getScope() == ndn::nfd::FACE_SCOPE_LOCAL) {
@@ -330,7 +330,7 @@ void MultiPassStrategy::broadcastInterest(const Interest& interest, const Face& 
   }
 }
 
-void MultiPassStrategy::multicastInterest(const Interest& interest, const Face& inFace, const shared_ptr<pit::Entry>& pitEntry, const fib::NextHopList& nexthops) {
+void AMIFStrategy::multicastInterest(const Interest& interest, const Face& inFace, const shared_ptr<pit::Entry>& pitEntry, const fib::NextHopList& nexthops) {
   for (const auto& nexthop : nexthops) {
     Face& outFace = nexthop.getFace();
     if ((outFace.getId() == inFace.getId() && outFace.getLinkType() != ndn::nfd::LINK_TYPE_AD_HOC) ||

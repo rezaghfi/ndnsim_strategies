@@ -3,8 +3,8 @@
  * @date: 12 tir 1400 10:02
 */
 
-#ifndef NFD_DAEMON_FW_SELF_LEARNING_STRATEGY_HPP
-#define NFD_DAEMON_FW_SELF_LEARNING_STRATEGY_HPP
+#ifndef NFD_DAEMON_AMIF_STRATEGY_HPP
+#define NFD_DAEMON_AMIF_STRATEGY_HPP
 
 #include "fw/strategy.hpp"
 #include <ndn-cxx/lp/prefix-announcement-header.hpp>
@@ -39,11 +39,11 @@ namespace nfd {
      *
      *  \note This strategy is not EndpointId-aware
      */
-    class MultiPassStrategy : public Strategy
+    class AMIFStrategy : public Strategy
     {
       public:
       explicit
-        MultiPassStrategy(Forwarder& forwarder, const Name& name = getStrategyName());
+        AMIFStrategy(Forwarder& forwarder, const Name& name = getStrategyName());
 
       static const Name&
         getStrategyName();
@@ -152,4 +152,4 @@ namespace nfd {
   } // namespace fw
 } // namespace nfd
 
-#endif // NFD_DAEMON_FW_SELF_LEARNING_STRATEGY_HPP
+#endif // NFD_DAEMON_AMIF_STRATEGY_HPP

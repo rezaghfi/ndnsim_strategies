@@ -1,18 +1,12 @@
-/*
- * MDP-strategy.hpp
- *
- *  Created on: Jun 26, 2019
- *      Author: reza
- */
 
-#ifndef NDNSIM_NFD_DAEMON_FW_MDP_STRATEGY_HPP_
-#define NDNSIM_NFD_DAEMON_FW_MDP_STRATEGY_HPP_
+
+#ifndef NDNSIM_NFD_DAEMON_FW_SMDP_STRATEGY_HPP_
+#define NDNSIM_NFD_DAEMON_FW_SMDP_STRATEGY_HPP_
 
 #include "strategy.hpp"
 #include "asf-measurements.hpp"
 #include "fw/retx-suppression-exponential.hpp"
-// for queue size : calculating load
-#include "/home/reza/ndnsim-MDP/ns-3/src/network/utils/queue-size.h"
+
 
 namespace nfd {
 namespace fw {
@@ -29,11 +23,11 @@ struct FaceStats{
 	int unSatisfiedInterest;
 };
 
-class MDPStrategy: public Strategy {
+class SMDPStrategy: public Strategy {
 public:
 explicit
 
-MDPStrategy(Forwarder& forwarder, const Name& name = getStrategyName());
+SMDPStrategy(Forwarder& forwarder, const Name& name = getStrategyName());
 
 static const Name& getStrategyName();
 
@@ -59,4 +53,4 @@ private:
 } /* namespace fw */
 } /* namespace nfd */
 
-#endif /* NDNSIM_NFD_DAEMON_FW_MDP_STRATEGY_HPP_ */
+#endif /* NDNSIM_NFD_DAEMON_FW_SMDP_STRATEGY_HPP_ */

@@ -1,8 +1,6 @@
 /**
  * Copyright (c) 2015 Daniel Posch (Alpen-Adria Universität Klagenfurt)
  *
- * This file is part of the ndnSIM extension for Stochastic Adaptive Forwarding (SAF).
- *
  * ndnSIM is free software: you can redistribute it and/or modify it under the terms
  * of the GNU General Public License as published by the Free Software Foundation,
  * either version 3 of the License, or (at your option) any later version.
@@ -15,10 +13,10 @@
  * ndnSIM, e.g., in COPYING.md file.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-/*This Strategy implements the RFA as presented in Carofiglio et al.: Optimal Multipath Congestion Control and Request Forwarding in Information-Centric Networks*/
+/*This Strategy implements the RFAStrategy as presented in Carofiglio et al.: Optimal Multipath Congestion Control and Request Forwarding in Information-Centric Networks*/
 
-#ifndef RFA_H
-#define RFA_H
+#ifndef RFAStrategy_H
+#define RFAStrategy_H
 
 #include "face/face.hpp"
 #include "fw/strategy.hpp"
@@ -33,12 +31,12 @@ namespace nfd
 namespace fw
 {
 
-class RFA : public nfd::fw::Strategy
+class RFAStrategy : public nfd::fw::Strategy
 {
 public:
-  RFA(Forwarder &forwarder, const Name &name = STRATEGY_NAME);
+  RFAStrategy(Forwarder &forwarder, const Name &name = STRATEGY_NAME);
 
-  virtual ~RFA();
+  virtual ~RFAStrategy();
   virtual void afterReceiveInterest(const nfd::Face& inFace, const ndn::Interest& interest,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry);
   virtual void beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const nfd::Face& inFace, const ndn::Data& data);
   virtual void beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry);

@@ -1,14 +1,14 @@
-#include "saf.h"
+#include "saf-strategy.hpp"
 
 using namespace nfd;
 using namespace nfd::fw;
 
-const Name SAF::STRATEGY_NAME("ndn:/localhost/nfd/strategy/saf");
+const Name SAFStrategy::STRATEGY_NAME("ndn:/localhost/nfd/strategy/saf");
 
-SAF::SAF(Forwarder &forwarder, const Name &name) : Strategy(forwarder, name)
+SAFStrategy::SAFStrategy(Forwarder &forwarder, const Name &name) : Strategy(forwarder, name)
 {
   const FaceTable& ft = getFaceTable();
-  engine = boost::shared_ptr<SAFEngine>(new SAFEngine(ft, (int) ParameterConfiguration::getInstance ()->getParameter ("PREFIX_COMPONENT")));
+  engine = boost::shared_ptr<SAFStrategyEngine>(new SAFStrategyEngine(ft, (int) ParameterConfiguration::getInstance ()->getParameter ("PREFIX_COMPONENT")));
 
   this->afterAddFace.connect([this] (shared_ptr<Face> face)
   {
@@ -21,11 +21,11 @@ SAF::SAF(Forwarder &forwarder, const Name &name) : Strategy(forwarder, name)
   });
 }
 
-SAF::~SAF()
+SAFStrategy::~SAFStrategy()
 {
 }
 
-void SAF::afterReceiveInterest(const Face& inFace, const Interest& interest ,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry)
+void SAFStrategy::afterReceiveInterest(const Face& inFace, const Interest& interest ,shared_ptr<fib::Entry> fibEntry, shared_ptr<pit::Entry> pitEntry)
 {
   /* Attention!!! interest != pitEntry->interest*/ // necessary to emulate NACKs in ndnSIM2.0
   /* interst could be /NACK/suffix, while pitEntry->getInterest is /suffix */
@@ -67,7 +67,7 @@ void SAF::afterReceiveInterest(const Face& inFace, const Interest& interest ,sha
     bool success = engine->tryForwardInterest (int_to_forward, getFaceTable ().get (nextHop));
 
     /*DISABLING LIMITS FOR NOW*/
-    success = true; // as not used in the SAF paper.
+    success = true; // as not used in the SAFStrategy paper.
 
     if(success)
     {
@@ -90,7 +90,7 @@ void SAF::afterReceiveInterest(const Face& inFace, const Interest& interest ,sha
   rejectPendingInterest(pitEntry);
 }
 
-void SAF::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFace, const Data& data)
+void SAFStrategy::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFace, const Data& data)
 {  
   const std::list<nfd::pit::OutRecord> outRecords = pitEntry->getOutRecords ();
   for(nfd::pit::OutRecordCollection::const_iterator it = outRecords.begin (); it!=outRecords.end (); ++it)
@@ -104,14 +104,14 @@ void SAF::beforeSatisfyInterest(shared_ptr<pit::Entry> pitEntry,const Face& inFa
   Strategy::beforeSatisfyInterest (pitEntry,inFace, data);
 }
 
-void SAF::beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry)
+void SAFStrategy::beforeExpirePendingInterest(shared_ptr< pit::Entry > pitEntry)
 {
   engine->logExpiredInterest(pitEntry);
   clearKnownFaces(pitEntry->getInterest());
   Strategy::beforeExpirePendingInterest (pitEntry);
 }
 
-std::vector<int> SAF::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
+std::vector<int> SAFStrategy::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
 {
   std::vector<int> faces;
   const nfd::pit::InRecordCollection records = pitEntry->getInRecords();
@@ -124,7 +124,7 @@ std::vector<int> SAF::getAllInFaces(shared_ptr<pit::Entry> pitEntry)
   return faces;
 }
 
-std::vector<int> SAF::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
+std::vector<int> SAFStrategy::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
 {
   std::vector<int> faces;
   const nfd::pit::OutRecordCollection records = pitEntry->getOutRecords();
@@ -135,7 +135,7 @@ std::vector<int> SAF::getAllOutFaces(shared_ptr<pit::Entry> pitEntry)
   return faces;
 }
 
-bool SAF::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
+bool SAFStrategy::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
   if(it == inFaceMap.end ())
@@ -150,7 +150,7 @@ bool SAF::isRtx (const nfd::Face& inFace, const ndn::Interest& interest)
   return false;
 }
 
-void SAF::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interest)
+void SAFStrategy::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
 
@@ -163,7 +163,7 @@ void SAF::addToKnownInFaces(const nfd::Face& inFace, const ndn::Interest&interes
     inFaceMap[interest.getName ().toUri ()].push_back(inFace.getId());    //remember it
 }
 
-void SAF::clearKnownFaces(const ndn::Interest&interest)
+void SAFStrategy::clearKnownFaces(const ndn::Interest&interest)
 {
   KnownInFaceMap::iterator it = inFaceMap.find (interest.getName ().toUri());
 
